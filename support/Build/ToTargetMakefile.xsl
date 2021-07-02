@@ -51,38 +51,6 @@ http://creativecommons.org/publicdomain/zero/1.0/
     </xsl:choose>
 </xsl:template>
 
-<xsl:template match="gcc">
-    <!-- What follows is a shameless hack to avoid -march=native on aarch64 with clang -->
-    <xsl:if test=".= '-march=native'">
-        <xsl:text>ifneq ($(UNAME_M)$(findstring clang,$(CC)),aarch64clang)
-</xsl:text>
-    </xsl:if>
-    <xsl:text>CFLAGS := $(CFLAGS) </xsl:text>
-    <xsl:value-of select="."/>
-    <xsl:text>
-</xsl:text>
-    <xsl:if test=".= '-march=native'">
-        <xsl:text>endif
-</xsl:text>
-    </xsl:if>
-</xsl:template>
-
-<xsl:template match="gas">
-    <!-- What follows is a shameless hack to avoid -march=native on aarch64 with clang -->
-    <xsl:if test=".= '-march=native'">
-        <xsl:text>ifneq ($(UNAME_M)$(findstring clang,$(CC)),aarch64clang)
-</xsl:text>
-    </xsl:if>
-    <xsl:text>ASMFLAGS := $(ASMFLAGS) </xsl:text>
-    <xsl:value-of select="."/>
-    <xsl:text>
-</xsl:text>
-    <xsl:if test=".= '-march=native'">
-        <xsl:text>endif
-</xsl:text>
-    </xsl:if>
-</xsl:template>
-
 <xsl:template match="define">
     <xsl:text>CFLAGS := $(CFLAGS) -D</xsl:text>
     <xsl:value-of select="."/>
@@ -203,6 +171,12 @@ ifeq ($(UNAME_S),Darwin)
     ASMFLAGS := -x assembler-with-cpp -Wa,-defsym,add_underscore=1 -Wa,-defsym,no_type=1 -Wa,-defsym,no_size=1 -Wa,-defsym,no_plt=1
 endif
 ifneq (,$(findstring mingw32,$(CC)))
+    ASMFLAGS := -x assembler-with-cpp -Wa,-defsym,no_type=1 -Wa,-defsym,no_size=1 -Wa,-defsym,no_plt=1
+endif
+ifneq (,$(findstring MINGW,$(UNAME_S)))
+    ASMFLAGS := -x assembler-with-cpp -Wa,-defsym,no_type=1 -Wa,-defsym,no_size=1 -Wa,-defsym,no_plt=1
+endif
+ifneq (,$(findstring MSYS_NT,$(UNAME_S)))
     ASMFLAGS := -x assembler-with-cpp -Wa,-defsym,no_type=1 -Wa,-defsym,no_size=1 -Wa,-defsym,no_plt=1
 endif
 UNAME_M := $(shell uname -m)
