@@ -1,6 +1,51 @@
-name: CD
+name: release
 on: [push, pull_request]
 jobs:
+  windows:
+    name: windows
+    runs-on: windows-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+    - uses: actions/checkout@v2
+    - uses: msys2/setup-msys2@v2
+    - name: Install Depencies
+      run: |
+         msys2 -c 'pacman -S --noconfirm libxslt base-devel mingw-w64-x86_64-clang'
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2  
+    - name: Build Generic64
+      shell: msys2 {0}
+      run: | 
+        CFLAGS="-O3 -g0 -march=ivybridge -mtune=native" ASMFLAGS="-march=ivybridge -mtune=native" make generic64/libXKCP.so
+    - name: Build SSSE3
+      shell: msys2 {0}
+      run: |
+        CFLAGS="-O3 -g0 -march=corei7 -mtune=native" ASMFLAGS="-march=corei7 -mtune=native" make SSSE3/libXKCP.so
+    - name: Build AVX2
+      shell: msys2 {0}
+      run: |
+        CFLAGS="-O3 -g0 -march=skylake -mtune=native" ASMFLAGS="-march=skylake -mtune=native" make AVX2/libXKCP.so
+    - name: Build AVX512
+      shell: msys2 {0}
+      run: |
+        CFLAGS="-O3 -g0 -march=skylake-avx512 -mtune=native" ASMFLAGS="-march=skylake-avx512 -mtune=native" make AVX512/libXKCP.so
+    - name: Change Artifact Name
+      run: |
+          mkdir bin/artifacts
+          mv bin/AVX2/libXKCP.so bin/artifacts/XKCP-AVX2.dll
+          mv bin/AVX512/libXKCP.so bin/artifacts/XKCP-AVX512.dll
+          mv bin/SSSE3/libXKCP.so bin/artifacts/XKCP-SSSE3.dll
+          mv bin/generic64/libXKCP.so bin/artifacts/XKCP.dll
+          mv bin/generic64/libXKCP.so.headers bin/artifacts/libXKCP-win.so.headers
+          ls bin/artifacts
+
+    - name: Upload win Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: XKCP-win
+        path: |
+          bin/artifacts/*.dll
+          bin/artifacts/libXKCP-win.so.headers          
   linux:
     name: linux
     if: startsWith(github.ref, 'refs/tags/')
@@ -30,7 +75,7 @@ jobs:
           mv bin/AVX2/libXKCP.so bin/artifacts/libXKCP-AVX2.so
           mv bin/AVX512/libXKCP.so bin/artifacts/libXKCP-AVX512.so
           mv bin/SSSE3/libXKCP.so bin/artifacts/libXKCP-SSSE3.so
-          mv bin/generic64/libXKCP.so bin/artifacts/libXKCP-generic64.so
+          mv bin/generic64/libXKCP.so bin/artifacts/libXKCP.so
           mv bin/generic64/libXKCP.so.headers bin/artifacts/libXKCP-linux.so.headers
           ls bin/artifacts
     - name: Upload Linux Artifact
@@ -68,7 +113,7 @@ jobs:
           mv bin/AVX2/libXKCP.so bin/artifacts/libXKCP-AVX2.dylib
           mv bin/AVX512/libXKCP.so bin/artifacts/libXKCP-AVX512.dylib
           mv bin/SSSE3/libXKCP.so bin/artifacts/libXKCP-SSSE3.dylib
-          mv bin/generic64/libXKCP.so bin/artifacts/libXKCP-generic64.dylib
+          mv bin/generic64/libXKCP.so bin/artifacts/libXKCP.dylib
           mv bin/generic64/libXKCP.so.headers bin/artifacts/libXKCP-osx.so.headers
           ls bin/artifacts
     - name: Upload osx Artifact
@@ -81,7 +126,7 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
-    needs: [linux,osx]
+    needs: [linux,osx,windows]
     steps:
       - name: Download XKCP linux
         uses: actions/download-artifact@v2
@@ -93,13 +138,20 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: XKCP-osx
-          path: osx        
+          path: osx
+
+      - name: Download XKCP windows
+        uses: actions/download-artifact@v2
+        with:
+          name: XKCP-win
+          path: win                  
 
       - name: Zip file
         run: |
           mkdir artifacts/
           tar czf artifacts/XKCP-linux.tar.gz -C linux/ $(find linux -type f -name "*.so" -exec basename {} \;) libXKCP-linux.so.headers/
           tar czf artifacts/XKCP-osx.tar.gz -C osx/ $(find osx -type f -name "*.dylib" -exec basename {} \;) libXKCP-osx.so.headers/
+          tar czf artifacts/XKCP-win.tar.gz -C win/ $(find win -type f -name "*.dll" -exec basename {} \;) libXKCP-win.so.headers/
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
