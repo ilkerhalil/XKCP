@@ -34,7 +34,8 @@ jobs:
         reviewers: |
           TYoungSL
         body: |
-          Please check changes upstream XKCP master branch.
+          Please check changes from upstream XKCP master branch.
         labels: |
           automated-pr
           xkcp
+          upstream
