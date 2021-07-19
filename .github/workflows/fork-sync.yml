@@ -1,0 +1,38 @@
+on:
+  schedule:
+    - cron:  '0 7 * * 1,4'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag'
+        required: true
+jobs:
+  sync_with_upstream:
+    runs-on: ubuntu-latest
+    name: Sync main with upstream latest
+    steps:
+    - name: Checkout stirling-labs branch
+      uses: actions/checkout@v2
+      with:
+        ref: stirling-labs
+    - name: Pull upstream changes
+      id: sync
+      uses: aormsby/Fork-Sync-With-Upstream-action@v2.3
+      with:
+        upstream_repository: XKCP/XKCP
+        upstream_branch: master
+        target_branch: master
+        git_pull_args: '--unshallow'
+        github_token: ${{ github.token }}
+    - name: Create Pull Request
+      if: steps.sync.outputs.has_new_commits
+      uses: peter-evans/create-pull-request@v3
+      with:
+        token:  ${{ github.token }}
+        title: 'New changes XKCP/XKCP master branch has changes check-xkcp-upstream (${{ github.event.client_payload.tag }})'
+        branch: check-xkcp-upstream-${{ github.event.client_payload.tag }}
+        body: |
+          - Please check changes upstream XKCP master branch. StirlingLabs/XKCP (${{ github.event.client_payload.tag }})
+        labels: |
+          automated-pr
+          xkcp
