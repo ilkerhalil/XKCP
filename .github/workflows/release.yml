@@ -14,10 +14,10 @@ jobs:
       run: |
          msys2 -c 'pacman -S --noconfirm libxslt base-devel'
     - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2  
+      uses: microsoft/setup-msbuild@v1.0.2
     - name: Build Generic64
       shell: msys2 {0}
-      run: | 
+      run: |
         CFLAGS="-O3 -g0 -march=ivybridge -mtune=native" ASMFLAGS="-march=ivybridge -mtune=native" make generic64/libXKCP.so
     - name: Build SSSE3
       shell: msys2 {0}
@@ -46,7 +46,7 @@ jobs:
         name: XKCP-win
         path: |
           bin/artifacts/*.dll
-          bin/artifacts/libXKCP-win.so.headers          
+          bin/artifacts/libXKCP-win.so.headers
   build-linux:
     name: Build for Linux
     runs-on: ubuntu-latest
@@ -63,7 +63,7 @@ jobs:
     - name: Build SSSE3
       run: |
         CFLAGS="-O3 -g0 -march=corei7 -mtune=native" ASMFLAGS="-march=corei7 -mtune=native" make SSSE3/libXKCP.so
-    - name: Build AVX2 
+    - name: Build AVX2
       run: |
         CFLAGS="-O3 -g0 -march=skylake -mtune=native" ASMFLAGS="-march=skylake -mtune=native" make AVX2/libXKCP.so
     - name: Build AVX512
@@ -99,7 +99,7 @@ jobs:
     - name: Build SSSE3
       run: |
         CFLAGS="-O3 -g0 -march=corei7 -mtune=native" ASMFLAGS="-march=corei7 -mtune=native" make SSSE3/libXKCP.so
-    - name: Build AVX2 
+    - name: Build AVX2
       run: |
         CFLAGS="-O3 -g0 -march=skylake -mtune=native" ASMFLAGS="-march=skylake -mtune=native" make AVX2/libXKCP.so
     - name: Build AVX512
@@ -137,7 +137,7 @@ jobs:
           tar czf artifacts/XKCP-win.tar.gz -C XKCP-win/ $(find XKCP-win -type f -name "*.dll" -exec basename {} \;)
           tar czf artifacts/XKCP-headers.tar.gz -C XKCP-linux/ XKCP-linux/include/
       - name: Create release on GitHub
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v0.1.12
         with:
           name: XKCP
           files: |
