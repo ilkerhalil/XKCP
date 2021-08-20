@@ -100,7 +100,6 @@ jobs:
     - name: Build AVX512
       run: |
         CFLAGS="-O3 -g0 -march=skylake-avx512 -mtune=native" ASMFLAGS="-march=skylake-avx512 -mtune=native" make AVX512/libXKCP.so
-
     - name: Rename artifacts
       run: |
           mkdir bin/artifacts
