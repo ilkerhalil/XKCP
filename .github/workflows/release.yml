@@ -9,28 +9,23 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: msys2/setup-msys2@v2
-    - name: Install dependencies
-      run: |
-         msys2 -c 'pacman -S --noconfirm libxslt base-devel'
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
+    - name: Install msys2 dependencies
+      run: |
+        c:\msys64\msys2_shell.cmd -defterm -no-start -here -mingw64 -c 'pacman -S --noconfirm libxslt'
     - name: Build Generic64
-      shell: msys2 {0}
       run: |
-        CFLAGS="-O3 -g0 -march=ivybridge -mtune=native" ASMFLAGS="-march=ivybridge -mtune=native" make generic64/libXKCP.so
+        c:\msys64\msys2_shell.cmd -defterm -no-start -here -mingw64 -c "CFLAGS='-O3 -g0 -march=ivybridge -mtune=native' ASMFLAGS='-march=ivybridge -mtune=native' make generic64/libXKCP.so"
     - name: Build SSSE3
-      shell: msys2 {0}
       run: |
-        CFLAGS="-O3 -g0 -march=corei7 -mtune=native" ASMFLAGS="-march=corei7 -mtune=native" make SSSE3/libXKCP.so
+        c:\msys64\msys2_shell.cmd -defterm -no-start -here -mingw64 -c "CFLAGS='-O3 -g0 -march=corei7 -mtune=native' ASMFLAGS='-march=corei7 -mtune=native' make SSSE3/libXKCP.so"
     - name: Build AVX2
-      shell: msys2 {0}
       run: |
-        CFLAGS="-O3 -g0 -march=skylake -mtune=native" ASMFLAGS="-march=skylake -mtune=native" make AVX2/libXKCP.so
+        c:\msys64\msys2_shell.cmd -defterm -no-start -here -mingw64 -c "CFLAGS='-O3 -g0 -march=skylake -mtune=native' ASMFLAGS='-march=skylake -mtune=native' make AVX2/libXKCP.so"
     - name: Build AVX512
-      shell: msys2 {0}
       run: |
-        CFLAGS="-O3 -g0 -march=skylake-avx512 -mtune=native" ASMFLAGS="-march=skylake-avx512 -mtune=native" make AVX512/libXKCP.so
+        c:\msys64\msys2_shell.cmd -defterm -no-start -here -mingw64 -c "CFLAGS='-O3 -g0 -march=skylake-avx512 -mtune=native' ASMFLAGS='-march=skylake-avx512 -mtune=native' make AVX512/libXKCP.so"
     - name: Rename artifacts
       run: |
           mkdir bin/artifacts
@@ -84,7 +79,7 @@ jobs:
         name: XKCP-linux
         path: |
           bin/artifacts/*.so
-          bin/artifacts/libXKCP-linux.so.headers
+          bin/artifacts/include/libXKCP-linux.so.headers
   build-osx:
     name: Build for Mac OSX
     runs-on: macos-latest
