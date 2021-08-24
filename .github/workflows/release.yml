@@ -17,7 +17,7 @@ jobs:
     - name: Install msys2 dependencies
       shell: msys2_shell.cmd -defterm -no-start -here -mingw64 -c {0}
       run: |
-          'pacman -S --noconfirm libxslt'
+          pacman -S --noconfirm libxslt
 
     - name: Build Generic64
       run: |
