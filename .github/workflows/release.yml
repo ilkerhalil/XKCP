@@ -1,8 +1,8 @@
 name: Create Release
 on:
   push:
-    tags:
-      - v*
+    # tags:
+    #   - v*
 jobs:
   build-win:
     name: Build for Windows
