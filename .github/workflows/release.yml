@@ -19,24 +19,34 @@ jobs:
       run: |
         pacman -S --noconfirm libxslt
     - name: Build Generic64
-      shell: msys2_shell.cmd {0}
+      shell: msys2_shell.cmd -defterm -no-start -here -mingw64 {0}
       run: |
-        -defterm -no-start -here -mingw64 -c "make generic64/libXKCP.so"
+        make generic64/libXKCP.so
       env:
         CFLAGS: -O3 -g0 -march=ivybridge -mtune=native
         ASMFLAGS: -march=ivybridge -mtune=native
     - name: Build SSSE3
-      shell: msys2_shell.cmd {0}
+      shell: msys2_shell.cmd -defterm -no-start -here -mingw64 {0}
       run: |
-        -defterm -no-start -here -mingw64 -c "CFLAGS='-O3 -g0 -march=corei7 -mtune=native' ASMFLAGS='-march=corei7 -mtune=native' make SSSE3/libXKCP.so"
+        make SSSE3/libXKCP.so
+      env:
+        CFLAGS: -O3 -g0 -march=corei7 -mtune=native
+        ASMFLAGS: -march=corei7 -mtune=native
     - name: Build AVX2
-      shell: msys2_shell.cmd {0}
+      shell: msys2_shell.cmd -defterm -no-start -here -mingw64 {0}
       run: |
-        -defterm -no-start -here -mingw64 -c "CFLAGS='-O3 -g0 -march=skylake -mtune=native' ASMFLAGS='-march=skylake -mtune=native' make AVX2/libXKCP.so"
+        make AVX2/libXKCP.so
+      env:
+        CFLAGS: -O3 -g0 -march=skylake -mtune=native
+        ASMFLAGS: -march=skylake -mtune=native
     - name: Build AVX512
-      shell: msys2_shell.cmd {0}
+      shell: msys2_shell.cmd -defterm -no-start -here -mingw64 {0}
       run: |
-        -defterm -no-start -here -mingw64 -c "CFLAGS='-O3 -g0 -march=skylake-avx512 -mtune=native' ASMFLAGS='-march=skylake-avx512 -mtune=native' make AVX512/libXKCP.so"
+        make AVX512/libXKCP.so
+      env:
+        CFLAGS: -O3 -g0 -march=skylake-avx512 -mtune=native
+        ASMFLAGS: -march=skylake-avx512 -mtune=native
+
     - name: Rename artifacts
       run: |
           mkdir bin/artifacts
